@@ -280,14 +280,6 @@ imap_send_login_info(XfceMailwatchIMAPMailbox *imailbox,
     if(bin <= 0)
         goto cleanuperr;
     
-    if(strstr(buf, "LOGINDISABLED")) {
-        xfce_mailwatch_log_message(imailbox->mailwatch,
-                                   XFCE_MAILWATCH_MAILBOX(imailbox),
-                                   XFCE_MAILWATCH_LOG_ERROR,
-                                   _("Secure IMAP is not available, and the IMAP server does not support plaintext logins."));
-        goto cleanuperr;
-    }
-    
 #ifdef HAVE_SSL_SUPPORT
     if(strstr(buf, "AUTH=CRAM-MD5")) {
         /* the server supports CRAM-MD5; prefer that over LOGIN */
@@ -348,6 +340,14 @@ imap_send_login_info(XfceMailwatchIMAPMailbox *imailbox,
         }
     }
 #endif
+
+    if(strstr(buf, "LOGINDISABLED")) {
+        xfce_mailwatch_log_message(imailbox->mailwatch,
+                                   XFCE_MAILWATCH_MAILBOX(imailbox),
+                                   XFCE_MAILWATCH_LOG_ERROR,
+                                   _("Secure IMAP is not available, and the IMAP server does not support plaintext logins."));
+        goto cleanuperr;
+    }
 
     /* no cram-md5 support, send the normal creds */
     g_snprintf(buf, BUFSIZE, "%05d LOGIN \"%s\" \"%s\"\r\n",
